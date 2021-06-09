@@ -31,16 +31,22 @@ type param struct {
 }
 
 type value struct {
-	Array    []value  `xml:"array>data>value"`
-	Struct   []member `xml:"struct>member"`
-	String   string   `xml:"string"`
-	Int      string   `xml:"int"`
-	Int4     string   `xml:"i4"`
-	Double   string   `xml:"double"`
-	Boolean  string   `xml:"boolean"`
-	DateTime string   `xml:"dateTime.iso8601"`
-	Base64   string   `xml:"base64"`
-	Raw      string   `xml:",innerxml"` // the value can be defualt string
+	Array    []value   `xml:"array>data>value"`
+	Struct   []member  `xml:"struct>member"`
+	String   string    `xml:"string"`
+	Int      string    `xml:"int"`
+	Int4     string    `xml:"i4"`
+	Double   string    `xml:"double"`
+	Boolean  string    `xml:"boolean"`
+	DateTime string    `xml:"dateTime.iso8601"`
+	Base64   string    `xml:"base64"`
+	Data     []RawData `xml:"data"`
+	Raw      string    `xml:",innerxml"` // the value can be defualt string
+}
+
+type RawData struct {
+	Desc string `xml:"desc"`
+	Val  string `xml:"val"`
 }
 
 type member struct {
@@ -151,6 +157,8 @@ func value2Field(value value, field *reflect.Value) error {
 		}
 		f = reflect.AppendSlice(f, slice)
 		val = f.Interface()
+	case len(value.Data) != 0:
+		val = value.Data
 	default:
 		// value field is default to string, see http://en.wikipedia.org/wiki/XML-RPC#Data_types
 		// also can be <nil/>
